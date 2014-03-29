@@ -44,18 +44,6 @@
   <div id="content" class="container">
     <article class="post">
   
-    <div class="gallery">
-  <div class="photoset">
-    
-      <img src="">
-    
-  </div>
-  <div class="control">
-    <div class="prev"></div>
-    <div class="next"></div>
-  </div>
-</div>
-  
   <div class="post-content">
     <header>
       
@@ -84,19 +72,19 @@
     </header>
     <div class="entry">
       
-        <p>When designing <em>Caaards.com</em>, I had decided to use Redis as main database and to<br> manually flush cold data to the disk. Later, I noticed Redis’s support for Lua<br> scripts.</p>
+        <p>When designing <em>Caaards.com</em>, I had decided to use Redis as main database and to<br> manually flush cold data to the disk. Later, I noticed Redis&#39;s support for Lua<br> scripts.</p>
 <p>It works simply: just pass a piece of Lua script with some arguments. To access<br>those arguments (keys and values) you could access two <strong>global</strong> arrays,<br><code>KEYS</code> and <code>ARGV</code>. However, it has some special limits:</p>
 <ol>
 <li><p>keys are distinguished from other arguments so that your script could be sent<br>to the right node in a cluster. When you pass arguments, you need to specify<br>the number of keys.</p>
 </li>
 <li><p>Each script should be a pure function so Redis could keep data consistence<br>between master and slave. What does this imply? You could not create global<br>variables, call random generators or get the time.</p>
 </li>
-<li><p>You could not call other scripts from your script. That didn’t make sense to<br>me. I asked a <a href="http://stackoverflow.com/questions/22432495/why-does-redis-forbid-user-script-to-call-other-scripts-how-to-keep-lua-scripts" target="_blank">question on Stack Overflow</a>. However, my question is redundant<br>and <em>Josiah</em> answered the correct question <a href="http://stackoverflow.com/questions/21718277/is-it-possible-to-call-lua-functions-defined-in-other-lua-scripts-in-redis/22599862" target="_blank">here</a>. It is said that <code>KEYS</code><br>and <code>ARGV</code> are two <strong>globals</strong>. If we need to call another script, Redis will<br>have to maintain another instance, which might be too heavy (the author boasted<br>that script module only used three hundred lines).</p>
+<li><p>You could not call other scripts from your script. That didn&#39;t make sense to<br>me. I asked a <a href="http://stackoverflow.com/questions/22432495/why-does-redis-forbid-user-script-to-call-other-scripts-how-to-keep-lua-scripts" target="_blank">question on Stack Overflow</a>. However, my question is redundant<br>and <em>Josiah</em> answered the correct question <a href="http://stackoverflow.com/questions/21718277/is-it-possible-to-call-lua-functions-defined-in-other-lua-scripts-in-redis/22599862" target="_blank">here</a>. It is said that <code>KEYS</code><br>and <code>ARGV</code> are two <strong>globals</strong>. If we need to call another script, Redis will<br>have to maintain another instance, which might be too heavy (the author boasted<br>that script module only used three hundred lines).</p>
 </li>
 </ol>
-<p>The third one is serious to me, as my design is to write as much code base<br>in Lua as possible. If I couldn’t reuse code, it will be a catastrophe.</p>
-<p>Let’s see an example any way:</p>
-<figure class="highlight Lua"><table><tr><td class="gutter"><pre>1
+<p>The third one is serious to me, as my design is to write as much code base<br>in Lua as possible. If I couldn&#39;t reuse code, it will be a catastrophe.</p>
+<p>Let&#39;s see an example any way:</p>
+<figure class="highlight lang-Lua"><table><tr><td class="gutter"><pre>1
 2
 3
 4
@@ -124,7 +112,7 @@
 <p>Another issue is that code readability decreases due to meaningless variable<br>name.</p>
 <hr>
 <p>I decided to introduce a simple macro system. Why simple? Because I had never<br>implemented a parser. Therefore, all macros are wrapped with ‘%’. Scripts are<br>stored in files and each file has a metadata table. The table records variables<br>involved, the script name to other scripts, and the command name to clients. The<br> above code could be rewritten like this:</p>
-<figure class="highlight Lua"><table><tr><td class="gutter"><pre>1
+<figure class="highlight lang-Lua"><table><tr><td class="gutter"><pre>1
 2
 3
 4
@@ -162,7 +150,7 @@ argv: %now_time%, %coefficient%
 
 <p>Does it look much nicer?</p>
 <p>How to call this script from other ones?</p>
-<figure class="highlight Lua"><table><tr><td class="gutter"><pre>1
+<figure class="highlight lang-Lua"><table><tr><td class="gutter"><pre>1
 2
 </pre></td><td class="code"><pre>%quiz_update%({ %quizset%, %word_key%, %star_key%, %interval_list% },
               { %now_time%, %coefficient% })
