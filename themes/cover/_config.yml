@@ -1,0 +1,34 @@
+menu:
+  Home: /
+  Archives: /archives
+
+widgets:
+- search
+
+cover:
+  enable: false
+  url: http://ww1.sinaimg.cn/large/6cea169fjw1edgyzma1xcj21kw16ohba.jpg
+
+excerpt_link: Read More
+
+full_format: 'ddd, MMM D YYYY, h:mm:ss a'
+
+addthis:
+  enable: false
+  pubid:
+  facebook:
+  twitter:
+  google: true
+  pinterest:
+
+fancybox: true
+
+rss:
+
+social:
+  github: https://github.com/notcome
+  weibo: http://weibo.com/notcome
+  google_plus:
+
+auto_change:
+  enable: false
