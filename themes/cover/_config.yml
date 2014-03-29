@@ -6,7 +6,7 @@ widgets:
 - search
 
 cover:
-  enable: false
+  enable: true
   url: http://selveskii.me/static/background.jpg
 
 excerpt_link: Read More
