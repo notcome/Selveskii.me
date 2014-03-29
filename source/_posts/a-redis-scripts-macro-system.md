@@ -12,6 +12,8 @@ It works simply: just pass a piece of Lua script with some arguments. To access
 those arguments (keys and values) you could access two **global** arrays,
 ``KEYS`` and ``ARGV``. However, it has some special limits:
 
+<!--more-->
+
 1. keys are distinguished from other arguments so that your script could be sent
  to the right node in a cluster. When you pass arguments, you need to specify
 the number of keys.

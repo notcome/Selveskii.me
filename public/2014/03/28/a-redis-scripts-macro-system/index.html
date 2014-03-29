@@ -74,6 +74,8 @@
       
         <p>When designing <em>Caaards.com</em>, I had decided to use Redis as main database and to<br> manually flush cold data to the disk. Later, I noticed Redis&#39;s support for Lua<br> scripts.</p>
 <p>It works simply: just pass a piece of Lua script with some arguments. To access<br>those arguments (keys and values) you could access two <strong>global</strong> arrays,<br><code>KEYS</code> and <code>ARGV</code>. However, it has some special limits:</p>
+<a id="more"></a>
+
 <ol>
 <li><p>keys are distinguished from other arguments so that your script could be sent<br>to the right node in a cluster. When you pass arguments, you need to specify<br>the number of keys.</p>
 </li>
@@ -165,6 +167,8 @@ argv: %now_time%, %coefficient%
           
           <div class="clearfix"></div>
           <nav id="pagination">
+  
+    <a href="/2014/03/29/online-gadgets/" class="alignleft prev"><i class="fa fa-long-arrow-left"></i>Next</a>
   
   
   <div class="clearfix"></div>
