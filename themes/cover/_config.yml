@@ -1,6 +1,7 @@
 menu:
   Home: /
   Archives: /archives
+  About: /about
 
 widgets:
 - search
@@ -31,4 +32,7 @@ social:
   google_plus:
 
 auto_change:
+  enable: false
+
+comment:
   enable: false
