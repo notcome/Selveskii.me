@@ -72,17 +72,114 @@
     </header>
     <div class="entry">
       
-        <pre>Error: Unknown logic tag at line 83: "quizset%,".
-    at Object.exports.parse (/usr/local/lib/node_modules/hexo/node_modules/swig/lib/parser.js:264:15)
-    at createTemplate (/usr/local/lib/node_modules/hexo/node_modules/swig/lib/swig.js:84:29)
-    at getTemplate (/usr/local/lib/node_modules/hexo/node_modules/swig/lib/swig.js:124:20)
-    at Object.exports.compile (/usr/local/lib/node_modules/hexo/node_modules/swig/lib/swig.js:186:14)
-    at /usr/local/lib/node_modules/hexo/lib/post/render.js:60:29
-    at /usr/local/lib/node_modules/hexo/node_modules/async/lib/async.js:548:21
-    at /usr/local/lib/node_modules/hexo/node_modules/async/lib/async.js:224:13
-    at iterate (/usr/local/lib/node_modules/hexo/node_modules/async/lib/async.js:131:13)
-    at async.eachSeries (/usr/local/lib/node_modules/hexo/node_modules/async/lib/async.js:147:9)
-    at _asyncMap (/usr/local/lib/node_modules/hexo/node_modules/async/lib/async.js:223:9)</pre>
+        <p>When designing <em>Caaards.com</em>, I had decided to use Redis as main database and to
+ manually flush cold data to the disk. Later, I noticed Redis&#39;s support for Lua
+ scripts.</p>
+<p>It works simply: just pass a piece of Lua script with some arguments. To access
+those arguments (keys and values) you could access two <strong>global</strong> arrays,
+<code>KEYS</code> and <code>ARGV</code>. However, it has some special limits:</p>
+<a id="more"></a>
+
+<ol>
+<li><p>keys are distinguished from other arguments so that your script could be sent
+to the right node in a cluster. When you pass arguments, you need to specify
+the number of keys.</p>
+</li>
+<li><p>Each script should be a pure function so Redis could keep data consistence
+between master and slave. What does this imply? You could not create global
+variables, call random generators or get the time.</p>
+</li>
+<li><p>You could not call other scripts from your script. That didn&#39;t make sense to
+me. I asked a <a href="http://stackoverflow.com/questions/22432495/why-does-redis-forbid-user-script-to-call-other-scripts-how-to-keep-lua-scripts" target="_blank">question on Stack Overflow</a>. However, my question is redundant
+and <em>Josiah</em> answered the correct question <a href="http://stackoverflow.com/questions/21718277/is-it-possible-to-call-lua-functions-defined-in-other-lua-scripts-in-redis/22599862" target="_blank">here</a>. It is said that <code>KEYS</code>
+and <code>ARGV</code> are two <strong>globals</strong>. If we need to call another script, Redis will
+have to maintain another instance, which might be too heavy (the author boasted
+that script module only used three hundred lines).</p>
+</li>
+</ol>
+<p>The third one is serious to me, as my design is to write as much code base
+in Lua as possible. If I couldn&#39;t reuse code, it will be a catastrophe.</p>
+<p>Let&#39;s see an example any way:</p>
+<figure class="highlight lang-Lua"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+</pre></td><td class="code"><pre><span class="keyword">local</span> intervals
+<span class="keyword">if</span> redis.call(<span class="string">'EXISTS'</span>, KEYS[<span class="number">4</span>]) == <span class="number">1</span> <span class="keyword">then</span>
+  intervals = redis.call(<span class="string">'GET'</span>, KEYS[<span class="number">4</span>])
+<span class="keyword">else</span>
+  intervals = {<span class="number">5</span>, <span class="number">15</span>, <span class="number">60</span>, <span class="number">180</span>, <span class="number">720</span>, <span class="number">2880</span>, <span class="number">5760</span>, <span class="number">11520</span>, <span class="number">23040</span>}
+<span class="keyword">end</span>
+
+<span class="keyword">local</span> star = <span class="built_in">tonumber</span>(redis.call(<span class="string">'GET'</span>, KEYS[<span class="number">3</span>]))
+<span class="keyword">local</span> time = ARGV[<span class="number">1</span>] + intervals[star] * (<span class="number">1</span> + ARGV[<span class="number">2</span>]) * <span class="number">60</span> * <span class="number">1000</span>
+
+<span class="keyword">return</span> redis.call(<span class="string">'ZADD'</span>, KEYS[<span class="number">1</span>], time, KEYS[<span class="number">2</span>])
+</pre></td></tr></table></figure>
+
+<p>In Lua, array index counts from 1 instead of 0.</p>
+<p>Another issue is that code readability decreases due to meaningless variable
+name.</p>
+<hr>
+<p>I decided to introduce a simple macro system. Why simple? Because I had never
+implemented a parser. Therefore, all macros are wrapped with &#39;%&#39;. Scripts are
+stored in files and each file has a metadata table. The table records variables
+involved, the script name to other scripts, and the command name to clients. The
+ above code could be rewritten like this:</p>
+<figure class="highlight lang-Lua"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+</pre></td><td class="code"><pre><span class="comment">--[[
+name: quiz_update
+keys: %quizset%, %word_key%, %star_key%, %interval_list%
+argv: %now_time%, %coefficient%
+]]</span><span class="comment">--</span>
+
+<span class="keyword">local</span> intervals
+<span class="keyword">if</span> redis.call(<span class="string">'EXISTS'</span>, %interval_list%) == <span class="number">1</span> <span class="keyword">then</span>
+  intervals = redis.call(<span class="string">'GET'</span>, %interval_list%)
+<span class="keyword">else</span>
+  intervals = {<span class="number">5</span>, <span class="number">15</span>, <span class="number">60</span>, <span class="number">180</span>, <span class="number">720</span>, <span class="number">2880</span>, <span class="number">5760</span>, <span class="number">11520</span>, <span class="number">23040</span>}
+<span class="keyword">end</span>
+
+<span class="keyword">local</span> star = <span class="built_in">tonumber</span>(redis.call(<span class="string">'GET'</span>, %star_key%))
+<span class="keyword">local</span> time = %now_time% + intervals[star] * (<span class="number">1</span> + %coefficient%) * <span class="number">60</span> * <span class="number">1000</span>
+
+<span class="keyword">return</span> redis.call(<span class="string">'ZADD'</span>, %quizset%, time, %word_key%)
+</pre></td></tr></table></figure>
+
+<p>Does it look much nicer?</p>
+<p>How to call this script from other ones?</p>
+<figure class="highlight lang-Lua"><table><tr><td class="gutter"><pre>1
+2
+</pre></td><td class="code"><pre>%quiz_update%({ %quizset%, %word_key%, %star_key%, %interval_list% },
+              { %now_time%, %coefficient% })
+</pre></td></tr></table></figure>
+
+<p>I have finished this project but no tests have been done. I plan to publish it
+in one week.</p>
+
       
     </div>
     <footer>
