@@ -86,8 +86,8 @@ Does it look much nicer?
 How to call this script from other ones?
 
 ```Lua
-%quiz_update%({ %quizset%, %word_key%, %star_key%, %interval_list% },
-              { %now_time%, %coefficient% })
+%quiz_update%({%quizset%, %word_key%, %star_key%, %interval_list%},
+              {%now_time%, %coefficient%})
 ```
 
 I have finished this project but no tests have been done. I plan to publish it

@@ -163,13 +163,17 @@ can improve my frontend skills from this process too.</p>
     </header>
     <div class="entry">
       
-        <p>When designing <em>Caaards.com</em>, I had decided to use Redis as main database and to
- manually flush cold data to the disk. Later, I noticed Redis&#39;s support for Lua
- scripts.</p>
-<p>It works simply: just pass a piece of Lua script with some arguments. To access
-those arguments (keys and values) you could access two <strong>global</strong> arrays,
-<code>KEYS</code> and <code>ARGV</code>. However, it has some special limits:</p>
-
+        <pre>Error: Unknown logic tag at line 83: "quizset%,".
+    at Object.exports.parse (/usr/local/lib/node_modules/hexo/node_modules/swig/lib/parser.js:264:15)
+    at createTemplate (/usr/local/lib/node_modules/hexo/node_modules/swig/lib/swig.js:84:29)
+    at getTemplate (/usr/local/lib/node_modules/hexo/node_modules/swig/lib/swig.js:124:20)
+    at Object.exports.compile (/usr/local/lib/node_modules/hexo/node_modules/swig/lib/swig.js:186:14)
+    at /usr/local/lib/node_modules/hexo/lib/post/render.js:60:29
+    at /usr/local/lib/node_modules/hexo/node_modules/async/lib/async.js:548:21
+    at /usr/local/lib/node_modules/hexo/node_modules/async/lib/async.js:224:13
+    at iterate (/usr/local/lib/node_modules/hexo/node_modules/async/lib/async.js:131:13)
+    at async.eachSeries (/usr/local/lib/node_modules/hexo/node_modules/async/lib/async.js:147:9)
+    at _asyncMap (/usr/local/lib/node_modules/hexo/node_modules/async/lib/async.js:223:9)</pre>
       
     </div>
     <footer>
