@@ -6,12 +6,14 @@ category: Work.en/Frontend
 
 Sometimes we need to calculate the hash value of a string, to get the QR code
 of a string, or to generate icon (.ico) file of a picture. It is inconvenient
-to search them each time. Thus, I decided to write my own gadgets library. I
-can improve my frontend skills from this process too.
+to search them each time. Thus, I decided to write an online gadget library.
+This project could also improve my frontend skills.
 
 <!--more-->
 
-Here is a list of my gadgets library plan:
+Here is the list of my online gadget library plan:
+
+##Text encoding
 
 - Hash generator
 
@@ -20,4 +22,14 @@ Here is a list of my gadgets library plan:
 - Braille generator (inputing all dots of each characters instead of typing
   some specific languages)
 
-- ... (comment if you want more)
+##Image processing
+
+- Icon converter
+
+##References
+
+- [IPA (International Phonetic Alphebet)][1]
+
+If you have good ideas, please comment.
+
+[1]: http://en.wikipedia.org/wiki/IPA
